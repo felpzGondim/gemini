@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A guided, linear, step-by-step journey structure was chosen to mirror the chronological process of a property sale after a failed auction. This "Process Funnel" approach starts with the user's initial problem (high-risk auction) and walks them through the subsequent, safer stages (Licitação, Venda Online, Venda Direta). This narrative structure is more intuitive and educational than a dashboard, as it directly answers the user's question of "what happens next?". Key interactions involve clicking through the stages to dynamically update a central comparative chart and detailed text descriptions, making the relationship between process stage and buyer benefits immediately clear. -->
+    <!-- Visualization & Content Choices: The primary visualization is a Chart.js bar chart to quantitatively compare key factors (Risk, Cost, Buyer Responsibility) across all sales stages. This replaces the source's static table with an interactive element. Goal: Compare. Method: Interactive Bar Chart. Interaction: Clicking a stage name updates chart highlights and displays corresponding detailed text. Justification: Visual comparison is faster and more impactful for decision-making. The text blocks are dynamically updated to provide context for the selected stage. Goal: Inform. Method: HTML text blocks. Interaction: Content changes based on user's stage selection. Justification: Keeps the interface clean and focused, presenting only relevant information at a time. This entire structure is designed to guide the user from a position of uncertainty to one of strategic clarity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <title>Guia Interativo: O Ciclo de Venda de Imóveis da Caixa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-left-width: 4px;
+            border-color: transparent;
+        }
+        .nav-button.active {
+            background-color: #FFFFFF;
+            border-color: #D97706; /* amber-600 */
+            color: #D97706;
+            transform: translateX(4px);
+        }
+        .nav-button:hover:not(.active) {
+            background-color: #FEF3C7; /* amber-100 */
+            border-color: #FBBF24; /* amber-400 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .icon-check {
+            background-color: #D1FAE5; /* green-100 */
+            color: #065F46; /* green-800 */
+        }
+        .icon-cross {
+            background-color: #FEE2E2; /* red-100 */
+            color: #991B1B; /* red-800 */
+        }
+        .icon-neutral {
+            background-color: #FEF3C7; /* amber-100 */
+            color: #92400E; /* amber-700 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-5xl font-bold text-amber-800 mb-2">O Imóvel de Leilão Não Foi Vendido. E Agora?</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Um guia interativo para entender o ciclo de venda da Caixa e encontrar a melhor oportunidade de compra.</p>
+        </header>
+
+        <main class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <nav class="lg:col-span-3">
+                    <h2 class="text-sm font-bold uppercase text-gray-500 mb-4 pl-4">Etapas da Venda</h2>
+                    <div id="navigation" class="space-y-2">
+                    </div>
+                </nav>
+
+                <div class="lg:col-span-9">
+                    <section id="content-display">
+                        <h3 id="stage-title" class="text-2xl md:text-3xl font-bold text-amber-700 mb-4"></h3>
+                        <p id="stage-description" class="text-gray-700 mb-6 leading-relaxed"></p>
+                        
+                        <div class="mb-8">
+                            <div class="chart-container">
+                                <canvas id="comparisonChart"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-gray-500 mt-2">Gráfico comparativo dos principais fatores de decisão.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-bold text-gray-600 mb-2">Dívidas (IPTU/Cond.)</h4>
+                                <div id="debt-responsibility" class="flex items-center justify-center"></div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-bold text-gray-600 mb-2">Comissão do Leiloeiro</h4>
+                                <div id="commission" class="flex items-center justify-center"></div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-bold text-gray-600 mb-2">Financiamento / FGTS</h4>
+                                <div id="financing" class="flex items-center justify-center"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 text-center">
+             <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-900 p-6 rounded-lg max-w-4xl mx-auto shadow-md">
+                <h3 class="font-bold text-xl mb-2">Conclusão e Plano de Ação</h3>
+                <p class="text-left leading-relaxed">Sua cautela inicial estava correta. A melhor estratégia é **esperar pacientemente** que o imóvel passe pela fase de leilão. Monitore o portal da Caixa até que ele reapareça em **Venda Online** ou, idealmente, **Venda Direta Online**. Nessas fases, a Caixa assume as dívidas, elimina a comissão e permite financiamento, transformando um ativo de alto risco em uma oportunidade de compra segura e muito mais vantajosa.</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        const salesData = {
+            'leilao': {
+                title: '1º e 2º Leilão Extrajudicial',
+                description: 'Esta é a fase inicial e de maior risco. O imóvel é ofertado em leilão público e o arrematante assume total responsabilidade por todas as dívidas existentes (IPTU, condomínio), além de pagar uma comissão de 5% ao leiloeiro. O pagamento é à vista, sem possibilidade de financiamento.',
+                debt: { text: 'Arrematante', type: 'cross' },
+                commission: { text: 'Sim (5%)', type: 'cross' },
+                financing: { text: 'Não', type: 'cross' },
+                chartValues: {
+                    risk: 10,
+                    cost: 8,
+                    complexity: 9
+                }
+            },
+            'licitacao': {
+                title: 'Licitação Aberta',
+                description: 'Se o imóvel não é vendido no leilão, ele pode ir para uma Licitação Aberta. A grande vantagem é que, geralmente, a Caixa passa a ser responsável pelas dívidas. No entanto, o comprador ainda paga a comissão de 5% e o financiamento normalmente não está disponível.',
+                debt: { text: 'Caixa', type: 'check' },
+                commission: { text: 'Sim (5%)', type: 'cross' },
+                financing: { text: 'Geralmente Não', type: 'neutral' },
+                chartValues: {
+                    risk: 6,
+                    cost: 6,
+                    complexity: 6
+                }
+            },
+            'venda-online': {
+                title: 'Venda Online',
+                description: 'Nesta fase, a venda ocorre em um portal online da Caixa com disputa por lances. As condições melhoram drasticamente: a Caixa quita as dívidas, não há comissão de leiloeiro e, crucialmente, o financiamento e o uso do FGTS são permitidos, tornando a compra muito mais acessível.',
+                debt: { text: 'Caixa', type: 'check' },
+                commission: { text: 'Não', type: 'check' },
+                financing: { text: 'Sim', type: 'check' },
+                chartValues: {
+                    risk: 3,
+                    cost: 3,
+                    complexity: 4
+                }
+            },
+            'venda-direta': {
+                title: 'Venda Direta Online',
+                description: 'A etapa mais vantajosa. Se o imóvel não recebe lances na Venda Online, ele entra em Venda Direta. Não há disputa: o primeiro a apresentar uma proposta pelo valor mínimo anunciado, leva. Oferece os maiores descontos, com dívidas pagas pela Caixa, sem comissão e com financiamento disponível.',
+                debt: { text: 'Caixa', type: 'check' },
+                commission: { text: 'Não', type: 'check' },
+                financing: { text: 'Sim', type: 'check' },
+                chartValues: {
+                    risk: 1,
+                    cost: 1,
+                    complexity: 2
+                }
+            }
+        };
+
+        const navigationContainer = document.getElementById('navigation');
+        const stageTitle = document.getElementById('stage-title');
+        const stageDescription = document.getElementById('stage-description');
+        const debtResponsibility = document.getElementById('debt-responsibility');
+        const commission = document.getElementById('commission');
+        const financing = document.getElementById('financing');
+        const chartCanvas = document.getElementById('comparisonChart');
+
+        let comparisonChart;
+
+        function createIcon(type, text) {
+            const iconClass = type === 'check' ? 'icon-check' : (type === 'cross' ? 'icon-cross' : 'icon-neutral');
+            const iconSVG = type === 'check' ?
+                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>` :
+                (type === 'cross' ?
+                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>` :
+                `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path></svg>`);
+            
+            return `
+                <div class="icon-box ${iconClass}">${iconSVG}</div>
+                <span class="ml-3 font-medium text-gray-700">${text}</span>
+            `;
+        }
+
+        function updateView(stageKey) {
+            const data = salesData[stageKey];
+
+            stageTitle.textContent = data.title;
+            stageDescription.textContent = data.description;
+
+            debtResponsibility.innerHTML = createIcon(data.debt.type, data.debt.text);
+            commission.innerHTML = createIcon(data.commission.type, data.commission.text);
+            financing.innerHTML = createIcon(data.financing.type, data.financing.text);
+            
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.stage === stageKey) {
+                    btn.classList.add('active');
+                }
+            });
+
+            updateChart(stageKey);
+        }
+
+        function updateChart(activeStageKey) {
+            const datasets = Object.keys(salesData).map(key => {
+                const stageData = salesData[key];
+                const isActive = key === activeStageKey;
+                return {
+                    label: stageData.title,
+                    data: [stageData.chartValues.risk, stageData.chartValues.cost, stageData.chartValues.complexity],
+                    backgroundColor: isActive ? 'rgba(217, 119, 6, 0.7)' : 'rgba(217, 119, 6, 0.2)',
+                    borderColor: isActive ? 'rgba(217, 119, 6, 1)' : 'rgba(217, 119, 6, 0.4)',
+                    borderWidth: 1.5
+                };
+            });
+            
+            comparisonChart.data.datasets = datasets;
+            comparisonChart.update();
+        }
+
+        function initializeApp() {
+            Object.keys(salesData).forEach(key => {
+                const button = document.createElement('button');
+                button.className = 'nav-button w-full text-left p-4 rounded-lg font-medium text-gray-700';
+                button.textContent = salesData[key].title;
+                button.dataset.stage = key;
+                button.addEventListener('click', () => updateView(key));
+                navigationContainer.appendChild(button);
+            });
+
+            const ctx = chartCanvas.getContext('2d');
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Nível de Risco', 'Custo/Complexidade', 'Barreiras de Entrada'],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 10) return 'Alto';
+                                    if (value === 5) return 'Médio';
+                                    if (value === 0) return 'Baixo';
+                                    return null;
+                                }
+                            }
+                        },
+                        y: {
+                           grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+
+            updateView('leilao');
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
