@@ -33,10 +33,14 @@ Abra [http://localhost:3000](http://localhost:3000).
 
 ## Conectar sensores reais
 
-1. Crie um projeto em [Tuya IoT Platform](https://iot.tuya.com/cloud/)
-2. Ative as APIs de Device Status / Device Management
-3. Vincule os dispositivos da conta Smart Life / Tuya Smart ao projeto (Cloud → Link Devices)
-4. Preencha no `.env.local`:
+1. Crie um projeto na Tuya Developer Platform. URLs que costumam funcionar:
+   - https://platform.tuya.com
+   - https://iot.tuya.com
+   - Documentação: https://developer.tuya.com/en/
+2. Em **Cloud → Development**, crie um projeto (**Smart Home**). No Brasil, use data center **Western America (us)**; se não achar os aparelhos, tente **Central Europe (eu)**.
+3. Ative as APIs de Device Status / Device Management / Smart Home.
+4. Vincule a conta do app **Smart Life** ou **Tuya Smart** (Devices → Link App Account).
+5. Preencha no `.env.local`:
 
 ```env
 TUYA_ACCESS_ID=seu_access_id
@@ -45,7 +49,18 @@ TUYA_REGION=us
 TUYA_DEMO_MODE=false
 ```
 
-5. Cadastre cada caixa no app com o **Device ID** Tuya, capacidade e níveis de alerta
+6. Cadastre cada caixa no app com o **Device ID** Tuya, capacidade e níveis de alerta.
+
+### Se o site da Tuya não carregar
+
+Isso é comum: o login trava em “Security control is loading”. Tente:
+
+- Abrir no **Chrome/Edge desktop** (evite celular)
+- Desligar bloqueador de anúncios / VPN
+- Usar outra rede (ex.: dados do celular)
+- Entrar por https://platform.tuya.com em vez de `iot.tuya.com`
+
+Enquanto isso, o AquaNível roda em **modo demo** sem precisar do portal.
 
 ## API
 
