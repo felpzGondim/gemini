@@ -1,0 +1,56 @@
+# Teste de bancada — 1 ESP32 + 1 sensor
+
+Sem nuvem, sem Tuya. Só para ver a distância mudar na mesa.
+
+## Comprar
+
+- 1× ESP32 DevKit (qualquer “ESP32 WROOM”)
+- 1× HC-SR04 (o ultrassônico comum, barato)
+- 1× protoboard + jumpers
+- 2 resistores para o Echo: **1 kΩ** e **2 kΩ** (o Echo do HC-SR04 é 5 V; o ESP32 é 3,3 V)
+
+Não use o JSN-SR04T ainda. Esse é para a caixa d’água depois.
+
+## Ligação
+
+```
+HC-SR04          ESP32
+------           -----
+VCC          →   5V (VIN)
+GND          →   GND
+Trig         →   GPIO 5
+
+Echo ── 1 kΩ ── GPIO 18
+         │
+        2 kΩ
+         │
+        GND
+```
+
+O divisor 1k + 2k baixa o Echo de 5 V para ~3,3 V.
+
+## Como rodar
+
+1. Instale o [Arduino IDE](https://www.arduino.cc/en/software)
+2. Placa: **ESP32 Dev Module** (adicione o pacote ESP32 em Placas)
+3. Abra `AquaNivelBancada.ino`
+4. Porta USB do ESP32 → Enviar
+5. Monitor Serial em **115200**
+
+Aproxime a mão ou um caderno. A distância em cm e o % devem mudar.
+
+## Página no celular (opcional)
+
+No começo do `.ino`, preencha:
+
+```cpp
+const char* WIFI_SSID = "SuaRede";
+const char* WIFI_PASS = "senha";
+```
+
+Envie de novo. No Serial aparece `http://192.168.x.x` — abra no celular **na mesma Wi-Fi**.
+
+## O que isso prova
+
+Que o ESP32 lê um sensor e transforma distância em nível.  
+Servidor na internet fica para um segundo teste, se esse da mesa funcionar.
