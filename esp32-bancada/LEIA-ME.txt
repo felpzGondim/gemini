@@ -1,21 +1,22 @@
-# Teste de bancada — 1 ESP32 + 1 sensor
+# Teste de bancada — ESP32 + JSN-SR04T
 
-Sem nuvem, sem Tuya. Só para ver a distância mudar na mesa.
+Um sensor, na mesa. Sem nuvem e sem Tuya.
 
 ## Comprar
 
-- 1× ESP32 DevKit (qualquer “ESP32 WROOM”)
-- 1× HC-SR04 (o ultrassônico comum, barato)
-- 1× protoboard + jumpers
-- 2 resistores para o Echo: **1 kΩ** e **2 kΩ** (o Echo do HC-SR04 é 5 V; o ESP32 é 3,3 V)
-
-Não use o JSN-SR04T ainda. Esse é para a caixa d’água depois.
+- 1× ESP32 DevKit (ESP32 WROOM)
+- 1× **JSN-SR04T** (placa + transdutor no cabo — o à prova d’água)
+- Protoboard + jumpers
+- Resistores **1 kΩ** e **2 kΩ** (Echo é 5 V; ESP32 é 3,3 V)
+- Opcional: capacitor **100 µF** entre VCC e GND da placa do sensor
 
 ## Ligação
 
+Alimente o JSN-SR04T em **5 V**, não em 3,3 V.
+
 ```
-HC-SR04          ESP32
-------           -----
+JSN-SR04T        ESP32
+---------        -----
 VCC          →   5V (VIN)
 GND          →   GND
 Trig         →   GPIO 5
@@ -27,30 +28,37 @@ Echo ── 1 kΩ ── GPIO 18
         GND
 ```
 
-O divisor 1k + 2k baixa o Echo de 5 V para ~3,3 V.
+Não solde resistor extra na placa do JSN (isso muda para modo serial). Deixe como veio: Trig + Echo.
 
-## Como rodar
+O transdutor (a “lata” no fio) é o que aponta para o alvo. A plaquinha fica na protoboard.
 
-1. Instale o [Arduino IDE](https://www.arduino.cc/en/software)
-2. Placa: **ESP32 Dev Module** (adicione o pacote ESP32 em Placas)
-3. Abra `AquaNivelBancada.ino`
-4. Porta USB do ESP32 → Enviar
-5. Monitor Serial em **115200**
+## Como testar
 
-Aproxime a mão ou um caderno. A distância em cm e o % devem mudar.
+O JSN tem **zona cega de ~20 cm**. Mão colada no sensor não funciona.
+
+1. Arduino IDE → placa **ESP32 Dev Module**
+2. Abra `AquaNivelBancada.ino` → Enviar
+3. Monitor Serial em **115200**
+4. Aponte o transdutor para o **chão ou uma parede**, a 25–150 cm
+5. Afaste e aproxime: a distância e o % mudam
+
+Na mesa, uma caixa de papelão ou o chão vale como “superfície da água”.
 
 ## Página no celular (opcional)
 
-No começo do `.ino`, preencha:
+No `.ino`:
 
 ```cpp
 const char* WIFI_SSID = "SuaRede";
 const char* WIFI_PASS = "senha";
 ```
 
-Envie de novo. No Serial aparece `http://192.168.x.x` — abra no celular **na mesma Wi-Fi**.
+O Serial mostra `http://192.168.x.x` — mesma Wi-Fi do celular.
 
-## O que isso prova
+## Se aparecer “sem eco”
 
-Que o ESP32 lê um sensor e transforma distância em nível.  
-Servidor na internet fica para um segundo teste, se esse da mesa funcionar.
+- Aproxime de uma parede, não da mão
+- Confira 5 V no VCC
+- Confira GND comum ESP32 + sensor
+- Espere ~1 s após ligar (o JSN demora a estabilizar)
+- Capacitor 100 µF em VCC–GND da placa do sensor ajuda
