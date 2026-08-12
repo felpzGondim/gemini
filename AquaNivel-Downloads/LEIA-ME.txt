@@ -1,0 +1,12 @@
+AquaNível — mock visual
+=======================
+
+Abra o arquivo AquaNivel.html no navegador (dois cliques).
+Não precisa instalar nada nem ter internet.
+
+Em cada caixa, arraste a barra "Distância do sensor":
+- distância pequena = caixa cheia
+- distância grande  = caixa vazia
+
+Pasta sugerida no seu computador:
+  Downloads/AquaNivel-mock/
