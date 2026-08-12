@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AquaNível — mock dos tanques</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #102a33;
+      --ink-soft: #3d5c66;
+      --foam: #f4fafb;
+      --teal-deep: #0d4f5b;
+      --teal: #157a8c;
+      --water: #3eb7c6;
+      --water-bright: #6fd4df;
+      --ok: #2f8f6b;
+      --warn: #c47a22;
+      --crit: #b33a3a;
+      --line: rgba(16, 42, 51, 0.12);
+      --shadow: 0 22px 50px rgba(13, 79, 91, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(1100px 520px at 8% -8%, rgba(111, 212, 223, 0.38), transparent 55%),
+        radial-gradient(800px 420px at 92% 0%, rgba(217, 196, 165, 0.28), transparent 50%),
+        linear-gradient(180deg, #f7fcfd 0%, #e7f1f3 48%, #dcecef 100%);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--teal);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Fraunces, Georgia, serif;
+      font-size: clamp(40px, 6vw, 64px);
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+    }
+
+    .lede {
+      margin: 10px 0 0;
+      max-width: 42ch;
+      color: var(--ink-soft);
+      font-size: 17px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 0 4px rgba(47, 143, 107, 0.16);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 20px 20px 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-family: Fraunces, Georgia, serif;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .loc {
+      margin: 4px 0 0;
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+
+    .status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: rgba(47, 143, 107, 0.12);
+      color: var(--ok);
+    }
+
+    .status.warn { background: rgba(196,122,34,0.14); color: var(--warn); }
+    .status.crit { background: rgba(179,58,58,0.14); color: var(--crit); }
+
+    .stage {
+      position: relative;
+      height: 280px;
+      margin: 8px 0 14px;
+      display: grid;
+      grid-template-columns: 42px 1fr 86px;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .ruler {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 0 22px;
+      font-size: 11px;
+      color: var(--ink-soft);
+      text-align: right;
+    }
+
+    .tank {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px 22px 18px 18px;
+      border: 3px solid rgba(16,42,51,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(232,242,244,0.92));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+    }
+
+    .sensor {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      width: 54px;
+      height: 16px;
+      border-radius: 6px;
+      background: #1a3a44;
+      box-shadow: 0 4px 10px rgba(16,42,51,0.25);
+    }
+
+    .sensor::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      width: 2px;
+      height: var(--gap, 40%);
+      transform: translateX(-50%);
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(196, 122, 34, 0.0),
+        rgba(196, 122, 34, 0.0) 4px,
+        rgba(196, 122, 34, 0.85) 4px,
+        rgba(196, 122, 34, 0.85) 8px
+      );
+    }
+
+    .water {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--fill, 50%);
+      transition: height 0.18s ease;
+    }
+
+    .water .fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, var(--bright, #6fd4df), var(--base, #3eb7c6) 55%, #157a8c);
+    }
+
+    .wave, .wave2 {
+      position: absolute;
+      left: -12%;
+      width: 124%;
+      height: 18px;
+    }
+
+    .wave { top: -10px; animation: drift 7s ease-in-out infinite alternate; }
+    .wave2 { top: -4px; opacity: 0.55; animation: drift 11s ease-in-out infinite alternate-reverse; }
+
+    .pct {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      z-index: 3;
+      background: rgba(255,255,255,0.86);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .side-stats {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    .side-stats b {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+      margin-top: 2px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    .metric span {
+      display: block;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 16px;
+    }
+
+    .control {
+      background: rgba(13, 79, 91, 0.05);
+      border-radius: 16px;
+      padding: 12px 12px 10px;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .control label em {
+      font-style: normal;
+      color: var(--teal-deep);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal-deep);
+      cursor: pointer;
+    }
+
+    .hint {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    footer {
+      margin-top: 22px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @keyframes drift {
+      from { transform: translateX(-5%); }
+      to { transform: translateX(5%); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <p class="eyebrow">Mock visual · sensor ultrassônico</p>
+        <h1>AquaNível</h1>
+        <p class="lede">Arraste a barra de cada caixa para simular a distância do sensor até a superfície da água.</p>
+      </div>
+      <div class="badge"><span class="dot"></span> Demonstração local · sem Tuya</div>
+    </header>
+
+    <section class="grid" id="grid"></section>
+    <footer>Quanto maior a distância lida pelo sensor, menor o nível da caixa.</footer>
+  </div>
+
+  <script>
+    const tanks = [
+      {
+        id: "casa",
+        name: "Caixa da Casa",
+        location: "Telhado principal",
+        capacity: 1000,
+        heightCm: 105,
+        distance: 36,
+        low: 25,
+        critical: 12,
+        high: 95,
+      },
+      {
+        id: "reserva",
+        name: "Reservatório Inferior",
+        location: "Área de serviço",
+        capacity: 5000,
+        heightCm: 100,
+        distance: 82,
+        low: 30,
+        critical: 15,
+        high: 92,
+      },
+      {
+        id: "poco",
+        name: "Caixa do Poço",
+        location: "Fundo do quintal",
+        capacity: 2000,
+        heightCm: 115,
+        distance: 8,
+        low: 20,
+        critical: 10,
+        high: 90,
+      },
+    ];
+
+    const grid = document.getElementById("grid");
+
+    function liters(n) {
+      return n >= 1000 ? (n / 1000).toFixed(2) + " m³" : Math.round(n).toLocaleString("pt-BR") + " L";
+    }
+
+    function tone(percent, tank) {
+      if (percent <= tank.critical) return "crit";
+      if (percent <= tank.low || percent >= tank.high) return "warn";
+      return "ok";
+    }
+
+    function colors(t) {
+      if (t === "crit") return { base: "#c45a5a", bright: "#e08a8a" };
+      if (t === "warn") return { base: "#d09a3d", bright: "#e8c06a" };
+      return { base: "#3eb7c6", bright: "#6fd4df" };
+    }
+
+    function statusLabel(t) {
+      if (t === "crit") return "Crítico";
+      if (t === "warn") return "Atenção";
+      return "Normal";
+    }
+
+    function snapshot(tank) {
+      const depth = Math.max(0, tank.heightCm - tank.distance);
+      const percent = Math.round((depth / tank.heightCm) * 100);
+      const volume = tank.capacity * (percent / 100);
+      const t = tone(percent, tank);
+      const c = colors(t);
+      const gap = Math.min(92, Math.max(8, (tank.distance / tank.heightCm) * 100));
+      return { depth, percent, volume, t, c, gap };
+    }
+
+    function paint(card, tank) {
+      const { depth, percent, volume, t, c, gap } = snapshot(tank);
+      const status = card.querySelector(".status");
+      status.className = "status " + t;
+      status.textContent = statusLabel(t);
+
+      const sensor = card.querySelector(".sensor");
+      sensor.style.setProperty("--gap", gap + "%");
+
+      const water = card.querySelector(".water");
+      water.style.setProperty("--fill", percent + "%");
+      water.style.setProperty("--base", c.base);
+      water.style.setProperty("--bright", c.bright);
+      water.querySelector(".wave path").setAttribute("fill", c.bright);
+      water.querySelector(".wave2 path").setAttribute("fill", c.base);
+
+      card.querySelector(".pct").textContent = percent + "%";
+      card.querySelector("[data-k=distance]").textContent = tank.distance + " cm";
+      card.querySelector("[data-k=depth]").textContent = depth + " cm";
+      card.querySelector("[data-k=volume]").textContent = liters(volume);
+      card.querySelector("[data-k=slider]").textContent = tank.distance + " cm";
+    }
+
+    function mount() {
+      grid.innerHTML = tanks.map((tank) => {
+        const { depth, percent, volume, t, c, gap } = snapshot(tank);
+        return `
+          <article class="card" data-id="${tank.id}">
+            <div class="card-head">
+              <div>
+                <h2>${tank.name}</h2>
+                <p class="loc">${tank.location}</p>
+              </div>
+              <span class="status ${t}">${statusLabel(t)}</span>
+            </div>
+
+            <div class="stage">
+              <div class="ruler">
+                <span>0 cm</span>
+                <span>${Math.round(tank.heightCm / 2)} cm</span>
+                <span>${tank.heightCm} cm</span>
+              </div>
+              <div class="tank">
+                <div class="sensor" style="--gap:${gap}%"></div>
+                <div class="water" style="--fill:${percent}%; --base:${c.base}; --bright:${c.bright}">
+                  <div class="fill"></div>
+                  <svg class="wave" viewBox="0 0 120 20" preserveAspectRatio="none">
+                    <path d="M0 10 Q 15 0 30 10 T 60 10 T 90 10 T 120 10 V20 H0 Z" fill="${c.bright}" />
+                  </svg>
+                  <svg class="wave2" viewBox="0 0 120 16" preserveAspectRatio="none">
+                    <path d="M0 8 Q 12 0 24 8 T 48 8 T 72 8 T 96 8 T 120 8 V16 H0 Z" fill="${c.base}" />
+                  </svg>
+                </div>
+                <div class="pct">${percent}%</div>
+              </div>
+              <div class="side-stats">
+                <div>Sensor<div><b data-k="distance">${tank.distance} cm</b></div></div>
+                <div>Água<div><b data-k="depth">${depth} cm</b></div></div>
+                <div>Fundo<div><b>${tank.heightCm} cm</b></div></div>
+              </div>
+            </div>
+
+            <div class="metrics">
+              <div class="metric"><span>Volume</span><strong data-k="volume">${liters(volume)}</strong></div>
+              <div class="metric"><span>Capacidade</span><strong>${liters(tank.capacity)}</strong></div>
+            </div>
+
+            <div class="control">
+              <label>
+                Distância do sensor
+                <em data-k="slider">${tank.distance} cm</em>
+              </label>
+              <input type="range" min="2" max="${tank.heightCm}" value="${tank.distance}" />
+              <p class="hint">2 cm = quase cheia · ${tank.heightCm} cm = vazia</p>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      grid.querySelectorAll("input[type=range]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const card = e.target.closest(".card");
+          const tank = tanks.find((item) => item.id === card.dataset.id);
+          tank.distance = Number(e.target.value);
+          paint(card, tank);
+        });
+      });
+    }
+
+    mount();
+  </script>
+</body>
+</html>

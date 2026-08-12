@@ -1,0 +1,65 @@
+{
+  "tanks": [
+    {
+      "id": "demo-casa",
+      "name": "Caixa da Casa",
+      "location": "Telhado principal",
+      "tuyaDeviceId": "demo-device-casa",
+      "shape": "cylindrical",
+      "capacityLiters": 1000,
+      "dimensions": {
+        "widthOrRadius": 0.55,
+        "height": 1.05
+      },
+      "alerts": {
+        "lowPercent": 25,
+        "criticalLowPercent": 12,
+        "highPercent": 95,
+        "enabled": true
+      },
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "demo-reserva",
+      "name": "Reservatório Inferior",
+      "location": "Área de serviço",
+      "tuyaDeviceId": "demo-device-reserva",
+      "shape": "rectangular",
+      "capacityLiters": 5000,
+      "dimensions": {
+        "widthOrRadius": 2,
+        "length": 2.5,
+        "height": 1
+      },
+      "alerts": {
+        "lowPercent": 30,
+        "criticalLowPercent": 15,
+        "highPercent": 92,
+        "enabled": true
+      },
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "demo-poco",
+      "name": "Caixa do Poço",
+      "location": "Fundo do quintal",
+      "tuyaDeviceId": "demo-device-poco",
+      "shape": "cylindrical",
+      "capacityLiters": 2000,
+      "dimensions": {
+        "widthOrRadius": 0.75,
+        "height": 1.15
+      },
+      "alerts": {
+        "lowPercent": 20,
+        "criticalLowPercent": 10,
+        "highPercent": 90,
+        "enabled": true
+      },
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
